@@ -102,7 +102,7 @@ export class UserMaker {
     if (response.ok) {
       // Poll for MSA
       let attempts = 0;
-      while (attempts < MAX_POLL_ATTEMPTS) {
+      do {
         const response = await fetch(
           `${this.#gatewayUrl}/v1/accounts/account/${keyPair.address}`,
         );
@@ -110,10 +110,10 @@ export class UserMaker {
           const result = await response.json();
           return result;
         } else {
-          ++attempts;
           await asyncTimeout(POLL_INTERVAL_MS);
         }
-      }
+      } while (++attempts < MAX_POLL_ATTEMPTS);
+
       // Give up
       throw new Error(
         `Did not receive msaId after ${attempts} attempts, giving up`,
